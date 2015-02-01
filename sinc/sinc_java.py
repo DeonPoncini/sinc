@@ -2,11 +2,11 @@
 
 ################################################################################
 # sinc-java
-# generate Java code
-################################################################################
-
+# generate Java code ################################################################################
 import codecs
 import os.path
+
+from sinc_ast import AstVisitor
 
 java_data_types = { \
         'string':'String', \
@@ -14,50 +14,41 @@ java_data_types = { \
         'int':'int', \
 }
 
-def write_java(ast, outPath, fileName):
-    paths = ast.package.uri.split(".")
-    paths.reverse()
-    for n in ast.package.ns:
-        paths.append(n)
+class JavaVisitor(AstVisitor):
+    def folder(self):
+        self.paths = self.ast.package.uri.split(".")
+        self.paths.reverse()
+        for n in self.ast.package.ns:
+            self.paths.append(n)
 
-    fullPath = os.path.join(outPath,'java', *paths)
-    if not os.path.exists(fullPath):
-        os.makedirs(fullPath)
-    outfile = codecs.open(os.path.join(fullPath, fileName + '.java'),
-            'w', 'utf-8')
-
-    packageName = ''
-    for p in paths:
-        packageName = packageName + p + '.'
-    packageName = packageName[:-1]
-    outfile.write('package ' + packageName + ';\n')
-
-    # outer class
-    outfile.write('public class ' + fileName + ' {\n')
-
-    # enumerations
-    for e in ast.enumerations:
-        outfile.write('public enum ' + e.name + ' {\n')
-        for entry in e.entries:
-            outfile.write('\t' + entry + ',\n')
-        outfile.write('}\n')
-
-    # constants
-    for c in ast.constants:
-        outfile.write('public static final ' + java_data_types[c.dataType] + \
-                ' ' + c.name + ' = ' + c.value + ';\n')
-
-    # structs
-    for s in ast.structures:
-        outfile.write('public static class ' + s.name + '{\n')
-        for e in s.elements:
-            if e.dataType in java_data_types:
-                outfile.write('\tpublic ' + java_data_types[e.dataType] + ' ' \
-                        + e.name + ';\n')
-            else:
-                outfile.write('\tpublic ' + e.dataType + ' ' + e.name + ';\n')
-        outfile.write('}\n')
-
-    # close class
-    outfile.write('}\n')
-
+        return os.path.join('java', *self.paths)
+    def full_filename(self):
+        return self.filename + '.java'
+    def write_intro(self):
+        packageName = ''
+        for p in self.paths:
+            packageName = packageName + p + '.'
+        packageName = packageName[:-1]
+        self.outfile.write('package ' + packageName + ';\n')
+        self.outfile.write('public class ' + self.filename + ' {\n')
+    def write_enumeration_name(self, name):
+        self.outfile.write('public enum ' + name + ' {\n')
+    def write_enumeration_entry(self, entry):
+        self.outfile.write('\t' + entry + ',\n')
+    def write_enumeration_close(self, name):
+        self.outfile.write('}\n')
+    def write_constant(self, dataType, name, value):
+        self.outfile.write('public static final ' + java_data_types[dataType] + \
+                ' ' + name + ' = ' + value + ';\n')
+    def write_structure_name(self, name):
+        self.outfile.write('public static class ' + name + '{\n')
+    def write_structure_element(self, dataType, name):
+        if dataType in java_data_types:
+            self.outfile.write('\tpublic ' + java_data_types[dataType] + ' ' \
+                    + name + ';\n')
+        else:
+            self.outfile.write('\tpublic ' + dataType + ' ' + name + ';\n')
+    def write_structure_close(self, name):
+        self.outfile.write('}\n')
+    def write_outro(self):
+        self.outfile.write('}\n')

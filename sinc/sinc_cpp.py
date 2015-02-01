@@ -8,7 +8,7 @@
 import codecs
 import os.path
 
-from sinc_common import Ast
+from sinc_ast import AstVisitor
 
 cpp_data_types = { \
         'string':'std::string', \
@@ -16,46 +16,42 @@ cpp_data_types = { \
         'int':'int', \
 }
 
-def write_cpp(ast, outPath, fileName):
-    fullPath = os.path.join(outPath, 'cpp')
-    if not os.path.exists(fullPath):
-        os.makedirs(fullPath)
-    outfile = codecs.open(os.path.join(fullPath, fileName + '.h'), 'w', 'utf-8')
-    guard=""
-    for n in ast.package.ns:
-        guard = guard + n.upper() + '_'
-    guard += fileName.upper() + '_H_CPP'
-    outfile.write('#ifndef ' + guard + '\n')
-    outfile.write('#define ' + guard + '\n')
-    outfile.write('#include <string>\n')
-    for n in ast.package.ns:
-        outfile.write('namespace ' + n + ' {\n')
-
-    # enumerations
-    for e in ast.enumerations:
-        outfile.write('enum class ' + e.name + ' {\n')
-        for entry in e.entries:
-            outfile.write('\t' + entry + ',\n')
-        outfile.write('};\n')
-
-    # constants
-    for c in ast.constants:
-        outfile.write('static const ' + cpp_data_types[c.dataType] + ' ' \
-                + c.name + ' = ' + c.value + ';\n')
-
-    # structs
-    for s in ast.structures:
-        outfile.write('struct ' + s.name + ' {\n')
-        for e in s.elements:
-            if e.dataType in cpp_data_types:
-                outfile.write('\t' + cpp_data_types[e.dataType] + ' ' \
-                        + e.name + ';\n')
+class CppVisitor(AstVisitor):
+    def folder(self):
+        return 'cpp'
+    def full_filename(self):
+        return self.filename + '.h'
+    def write_intro(self):
+        guard=""
+        for n in self.ast.package.ns:
+            guard = guard + n.upper() + '_'
+        guard += self.filename.upper() + '_H_CPP'
+        self.outfile.write('#ifndef ' + guard + '\n')
+        self.outfile.write('#define ' + guard + '\n')
+        self.outfile.write('#include <string>\n')
+    def write_package(self, package):
+        self.outfile.write('namespace ' + package + ' {\n')
+    def write_enumeration_name(self, name):
+        self.outfile.write('enum class ' + name + ' {\n')
+    def write_enumeration_entry(self, entry):
+        self.outfile.write('\t' + entry + ',\n')
+    def write_enumeration_close(self, name):
+        self.outfile.write('};\n')
+    def write_constant(self, dataType, name, value):
+        self.outfile.write('static const ' + cpp_data_types[dataType] + ' ' \
+                + name + ' = ' + value + ';\n')
+    def write_structure_name(self, name):
+        self.outfile.write('struct ' + name + ' {\n')
+    def write_structure_element(self, dataType, name):
+            if dataType in cpp_data_types:
+                self.outfile.write('\t' + cpp_data_types[dataType] + ' ' \
+                        + name + ';\n')
             else:
-                outfile.write('\t' + e.dataType + ' ' + e.name + ';\n')
-        outfile.write('};\n')
+                self.outfile.write('\t' + dataType + ' ' + name + ';\n')
+    def write_structure_close(self, name):
+        self.outfile.write('};\n')
+    def write_outro(self):
+        for n in self.ast.package.ns:
+            self.outfile.write('}\n')
 
-    for n in ast.package.ns:
-        outfile.write('}\n')
-
-    outfile.write('#endif\n')
-
+        self.outfile.write('#endif\n')

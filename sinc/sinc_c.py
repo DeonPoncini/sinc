@@ -8,54 +8,56 @@
 import codecs
 import os.path
 
+from sinc_ast import AstVisitor
+
 c_data_types = { \
         'string':'char*', \
         'unsigned':'unsigned', \
         'int':'int', \
 }
 
-def write_c(ast, outPath, fileName):
-    fullPath = os.path.join(outPath, 'c')
-    if not os.path.exists(fullPath):
-        os.makedirs(fullPath)
-    outfile = codecs.open(os.path.join(fullPath, fileName + '.h'), 'w', 'utf-8')
-    guard=""
-    for n in ast.package.ns:
-        guard = guard + n.upper() + '_'
-    guard += fileName.upper() + '_H_C'
-    outfile.write('#ifndef ' + guard + '\n')
-    outfile.write('#define ' + guard + '\n')
-    outfile.write('#ifdef __cplusplus\n')
-    outfile.write('extern "C" {\n')
-    outfile.write('#endif\n')
-    nsprefix = ""
-    for n in ast.package.ns:
-        nsprefix = nsprefix + n + '_'
-
-    # enumerations
-    for e in ast.enumerations:
-        outfile.write('typedef enum {\n')
-        for entry in e.entries:
-            outfile.write('\t' + nsprefix + e.name + '_' + entry + ',\n')
-        outfile.write('} ' + nsprefix + e.name + ';\n')
-
-    # constants
-    for c in ast.constants:
-        outfile.write('static const ' + c_data_types[c.dataType] + ' ' \
-                + nsprefix + c.name + ' = ' + c.value + ';\n')
-
-    # structs
-    for s in ast.structures:
-        outfile.write('typedef struct {\n')
-        for e in s.elements:
-            if e.dataType in c_data_types:
-                outfile.write('\t' + c_data_types[e.dataType] + ' ' \
-                        + e.name + ';\n')
-            else:
-                outfile.write('\t' + nsprefix + e.dataType + ' ' + e.name + ';\n')
-        outfile.write('} ' + nsprefix + s.name + ';\n')
-
-    outfile.write('#ifdef __cplusplus\n')
-    outfile.write('}\n')
-    outfile.write('#endif\n')
-    outfile.write('#endif\n')
+class CVisitor(AstVisitor):
+    def folder(self):
+        return 'c'
+    def full_filename(self):
+        return self.filename + '.h'
+    def write_intro(self):
+        guard=""
+        for n in self.ast.package.ns:
+            guard = guard + n.upper() + '_'
+        guard += self.filename.upper() + '_H_C'
+        self.outfile.write('#ifndef ' + guard + '\n')
+        self.outfile.write('#define ' + guard + '\n')
+        self.outfile.write('#ifdef __cplusplus\n')
+        self.outfile.write('extern "C" {\n')
+        self.outfile.write('#endif\n')
+        self.nsprefix = ""
+    def write_package(self, package):
+        self.nsprefix = self.nsprefix + package + '_'
+    def write_enumeration_name(self, name):
+        self.enum_name = name
+        self.outfile.write('typedef enum {\n')
+    def write_enumeration_entry(self, entry):
+        self.outfile.write('\t' + self.nsprefix + self.enum_name + \
+                '_' + entry + ',\n')
+    def write_enumeration_close(self, name):
+        self.outfile.write('} ' + self.nsprefix + name + ';\n')
+    def write_constant(self, dataType, name, value):
+        self.outfile.write('static const ' + c_data_types[dataType] + ' ' \
+                + self.nsprefix + name + ' = ' + value + ';\n')
+    def write_structure_name(self, name):
+        self.outfile.write('typedef struct {\n')
+    def write_structure_element(self, dataType, name):
+        if dataType in c_data_types:
+            self.outfile.write('\t' + c_data_types[dataType] + \
+                    ' ' + name + ';\n')
+        else:
+            self.outfile.write('\t' + self.nsprefix + dataType + \
+                    ' ' + name + ';\n')
+    def write_structure_close(self, name):
+        self.outfile.write('} ' + self.nsprefix + name + ';\n')
+    def write_outro(self):
+        self.outfile.write('#ifdef __cplusplus\n')
+        self.outfile.write('}\n')
+        self.outfile.write('#endif\n')
+        self.outfile.write('#endif\n')

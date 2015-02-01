@@ -10,10 +10,10 @@ import sys
 from xml.dom import minidom
 
 from sinc_ast import Package, Enumeration, Constant, Structure, Ast
-from sinc_c import write_c
-from sinc_cpp import write_cpp
-from sinc_java import write_java
-from sinc_python import write_python
+from sinc_c import CVisitor
+from sinc_cpp import CppVisitor
+from sinc_java import JavaVisitor
+from sinc_python import PythonVisitor
 
 if len(sys.argv) < 3:
     print "Usage is: " + sys.argv[0] + " <data.xml> <outpath> "
@@ -74,8 +74,14 @@ for s in structs:
         structure.add_element(Constant(name, dataType, 0))
     ast.add_structure(structure)
 
-write_cpp(ast, outPath, fileName)
-write_c(ast, outPath, fileName)
-write_java(ast, outPath, fileName)
-write_python(ast, outPath, fileName)
+cppVisitor = CppVisitor(ast, outPath, fileName)
+cppVisitor.write_ast()
 
+cVisitor = CVisitor(ast, outPath, fileName)
+cVisitor.write_ast()
+
+javaVisitor = JavaVisitor(ast, outPath, fileName)
+javaVisitor.write_ast()
+
+pythonVisitor = PythonVisitor(ast, outPath, fileName)
+pythonVisitor.write_ast()
