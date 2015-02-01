@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+<xs:element name="name" type="xs:string" />
+<xs:element name="namespace" type="xs:string" />
+<xs:element name="uri" type="xs:string" />
+<xs:element name="entry" type="xs:string" />
+<xs:element name="modifier" type="xs:string" />
+<xs:element name="value" type="xs:string" />
+<xs:element name="base" type="xs:string" />
+<xs:element name="template" type="xs:string" />
+
+<xs:attribute name="name" type="xs:string" use="required" />
+
+<xs:element name="namespaces">
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref="namespace" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name="package">
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref="uri" minOccurs="1" maxOccurs="1" />
+            <xs:element ref="namespaces" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name="entries">
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref="entry" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name="enum">
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref="name" minOccurs="1" maxOccurs="1" />
+            <xs:element ref="entries" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name="modifiers">
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref="modifier" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name="templates">
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref="template" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name="type">
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref="base" minOccurs="1" maxOccurs="1" />
+            <xs:element ref="templates" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name="typedecl">
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref="modifiers" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="type" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name="assignment">
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref="typedecl" minOccurs="1" maxOccurs="1" />
+            <xs:element ref="name" minOccurs="1" maxOccurs="1" />
+            <xs:element ref="value" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name="declaration">
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref="typedecl" minOccurs="1" maxOccurs="1" />
+            <xs:element ref="name" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name="declarations">
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref="declaration" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name="struct">
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref="name" minOccurs="1" maxOccurs="1" />
+            <xs:element ref="declarations" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name="data" minOccurs="1" maxOccurs="1">
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref="package" maxOccurs="1" />
+            <xs:element ref="enum" maxOccurs="unbounded" />
+            <xs:element ref="assignment" maxOccurs="unbounded" />
+            <xs:element ref="struct" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attributes ref="name" use="required" />
+    </xs:complexType>
+</xs:element>
+
+</xs:schema>
