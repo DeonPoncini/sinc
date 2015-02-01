@@ -9,7 +9,7 @@ import sys
 
 from xml.dom import minidom
 
-from sinc_common import Package, Enumeration, Constant, Structure
+from sinc_ast import Package, Enumeration, Constant, Structure, Ast
 from sinc_c import write_c
 from sinc_cpp import write_cpp
 from sinc_java import write_java
@@ -39,46 +39,43 @@ if len(packages) > 1:
 
 uri = packages[0].getAttribute('uri')
 namespace = packages[0].getElementsByTagName('namespace')
-nslist = []
+package = Package(uri)
 for n in namespace:
-    nslist.append(n.childNodes[0].nodeValue)
-packageObj = Package(uri, nslist)
+    package.add_namespace(n.childNodes[0].nodeValue)
+ast = Ast(package)
 
 # parse all the enums
-enumObjs = []
 enums = dataDom.getElementsByTagName('enum')
 for e in enums:
     name = e.getAttribute('name')
     entries = e.getElementsByTagName('entry')
-    entryList = []
+    enumeration = Enumeration(name)
     for e1 in entries:
-        entryList.append(e1.childNodes[0].nodeValue)
-    enumObjs.append(Enumeration(name,entryList))
+        enumeration.add_entry(e1.childNodes[0].nodeValue)
+    ast.add_enum(enumeration)
 
 # parse all the constants
-constantObjs = []
 constants = dataDom.getElementsByTagName('constant')
 for c in constants:
     name = c.getAttribute('name')
     dataType = c.getAttribute('type')
     value = c.childNodes[0].nodeValue
-    constantObjs.append(Constant(name, dataType, value))
+    ast.add_constant(Constant(name, dataType, value))
 
 # parse all the structs
-structObjs = []
 structs = dataDom.getElementsByTagName('struct')
 for s in structs:
-    sname = s.getAttribute('name')
+    name = s.getAttribute('name')
     elements = s.getElementsByTagName('element')
-    elementList = []
+    structure = Structure(name)
     for e in elements:
         name = e.childNodes[0].nodeValue
         dataType = e.getAttribute('type')
-        elementList.append(Constant(name, dataType, 0))
-    structObjs.append(Structure(sname, elementList))
+        structure.add_element(Constant(name, dataType, 0))
+    ast.add_structure(structure)
 
-write_cpp(packageObj, enumObjs, constantObjs, structObjs, outPath, fileName)
-write_c(packageObj, enumObjs, constantObjs, structObjs, outPath, fileName)
-write_java(packageObj, enumObjs, constantObjs, structObjs, outPath, fileName)
-write_python(packageObj, enumObjs, constantObjs, structObjs, outPath, fileName)
+write_cpp(ast, outPath, fileName)
+write_c(ast, outPath, fileName)
+write_java(ast, outPath, fileName)
+write_python(ast, outPath, fileName)
 

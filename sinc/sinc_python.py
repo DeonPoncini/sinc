@@ -8,8 +8,7 @@
 import codecs
 import os.path
 
-def write_python(packageObj, enumObjs, constantObjs, structObjs, \
-        outPath, fileName):
+def write_python(ast, outPath, fileName):
     fullPath = os.path.join(outPath, 'python')
     if not os.path.exists(fullPath):
         os.makedirs(fullPath)
@@ -26,7 +25,7 @@ def write_python(packageObj, enumObjs, constantObjs, structObjs, \
     outfile.write('\treturn type(\'Enum\', (), enums)\n')
 
     # enumerations
-    for e in enumObjs:
+    for e in ast.enumerations:
         outfile.write(e.name + ' = enum(')
         outstr = ''
         for entry in e.entries:
@@ -35,11 +34,11 @@ def write_python(packageObj, enumObjs, constantObjs, structObjs, \
         outfile.write(outstr + ')\n')
 
     # constants
-    for c in constantObjs:
+    for c in ast.constants:
         outfile.write(c.name + ' = ' + c.value + '\n')
 
     # structs
-    for s in structObjs:
+    for s in ast.structures:
         outfile.write('class ' + s.name + ':\n')
         outfile.write('\tdef __init__(self')
         for e in s.elements:

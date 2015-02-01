@@ -14,13 +14,13 @@ c_data_types = { \
         'int':'int', \
 }
 
-def write_c(packageObj, enumObjs, constantObjs, structObjs, outPath, fileName):
+def write_c(ast, outPath, fileName):
     fullPath = os.path.join(outPath, 'c')
     if not os.path.exists(fullPath):
         os.makedirs(fullPath)
     outfile = codecs.open(os.path.join(fullPath, fileName + '.h'), 'w', 'utf-8')
     guard=""
-    for n in packageObj.ns:
+    for n in ast.package.ns:
         guard = guard + n.upper() + '_'
     guard += fileName.upper() + '_H_C'
     outfile.write('#ifndef ' + guard + '\n')
@@ -29,23 +29,23 @@ def write_c(packageObj, enumObjs, constantObjs, structObjs, outPath, fileName):
     outfile.write('extern "C" {\n')
     outfile.write('#endif\n')
     nsprefix = ""
-    for n in packageObj.ns:
+    for n in ast.package.ns:
         nsprefix = nsprefix + n + '_'
 
     # enumerations
-    for e in enumObjs:
+    for e in ast.enumerations:
         outfile.write('typedef enum {\n')
         for entry in e.entries:
             outfile.write('\t' + nsprefix + e.name + '_' + entry + ',\n')
         outfile.write('} ' + nsprefix + e.name + ';\n')
 
     # constants
-    for c in constantObjs:
+    for c in ast.constants:
         outfile.write('static const ' + c_data_types[c.dataType] + ' ' \
                 + nsprefix + c.name + ' = ' + c.value + ';\n')
 
     # structs
-    for s in structObjs:
+    for s in ast.structures:
         outfile.write('typedef struct {\n')
         for e in s.elements:
             if e.dataType in c_data_types:

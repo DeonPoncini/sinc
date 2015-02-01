@@ -14,11 +14,10 @@ java_data_types = { \
         'int':'int', \
 }
 
-def write_java(packageObj, enumObjs, constantObjs, structObjs, \
-        outPath, fileName):
-    paths = packageObj.uri.split(".")
+def write_java(ast, outPath, fileName):
+    paths = ast.package.uri.split(".")
     paths.reverse()
-    for n in packageObj.ns:
+    for n in ast.package.ns:
         paths.append(n)
 
     fullPath = os.path.join(outPath,'java', *paths)
@@ -37,19 +36,19 @@ def write_java(packageObj, enumObjs, constantObjs, structObjs, \
     outfile.write('public class ' + fileName + ' {\n')
 
     # enumerations
-    for e in enumObjs:
+    for e in ast.enumerations:
         outfile.write('public enum ' + e.name + ' {\n')
         for entry in e.entries:
             outfile.write('\t' + entry + ',\n')
         outfile.write('}\n')
 
     # constants
-    for c in constantObjs:
+    for c in ast.constants:
         outfile.write('public static final ' + java_data_types[c.dataType] + \
                 ' ' + c.name + ' = ' + c.value + ';\n')
 
     # structs
-    for s in structObjs:
+    for s in ast.structures:
         outfile.write('public static class ' + s.name + '{\n')
         for e in s.elements:
             if e.dataType in java_data_types:
