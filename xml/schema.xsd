@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
+<xs:attribute name="name" type="xs:string" />
+
 <xs:element name="name" type="xs:string" />
 <xs:element name="namespace" type="xs:string" />
 <xs:element name="uri" type="xs:string" />
@@ -9,8 +11,6 @@
 <xs:element name="value" type="xs:string" />
 <xs:element name="base" type="xs:string" />
 <xs:element name="template" type="xs:string" />
-
-<xs:attribute name="name" type="xs:string" use="required" />
 
 <xs:element name="namespaces">
     <xs:complexType>
@@ -93,8 +93,8 @@
 <xs:element name="declaration">
     <xs:complexType>
         <xs:sequence>
-            <xs:element ref="typedecl" minOccurs="1" maxOccurs="1" />
             <xs:element ref="name" minOccurs="1" maxOccurs="1" />
+            <xs:element ref="typedecl" minOccurs="1" maxOccurs="1" />
         </xs:sequence>
     </xs:complexType>
 </xs:element>
@@ -116,15 +116,17 @@
     </xs:complexType>
 </xs:element>
 
-<xs:element name="data" minOccurs="1" maxOccurs="1">
+<xs:element name="data">
     <xs:complexType>
         <xs:sequence>
             <xs:element ref="package" maxOccurs="1" />
-            <xs:element ref="enum" maxOccurs="unbounded" />
-            <xs:element ref="assignment" maxOccurs="unbounded" />
-            <xs:element ref="struct" maxOccurs="unbounded" />
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="enum" />
+                <xs:element ref="assignment" />
+                <xs:element ref="struct" />
+            </xs:choice>
         </xs:sequence>
-        <xs:attributes ref="name" use="required" />
+        <xs:attribute ref="name" use="required" />
     </xs:complexType>
 </xs:element>
 
