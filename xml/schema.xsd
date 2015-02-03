@@ -93,8 +93,8 @@
 <xs:element name="declaration">
     <xs:complexType>
         <xs:sequence>
-            <xs:element ref="name" minOccurs="1" maxOccurs="1" />
             <xs:element ref="typedecl" minOccurs="1" maxOccurs="1" />
+            <xs:element ref="name" minOccurs="1" maxOccurs="1" />
         </xs:sequence>
     </xs:complexType>
 </xs:element>

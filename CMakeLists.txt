@@ -10,5 +10,6 @@ set(SINC_VERSION "0.0.1")
 export_project(
     NAME sinc
     PYTHON_INCLUDES ${CMAKE_CURRENT_LIST_DIR}/sinc
+    DATA ${CMAKE_CURRENT_LIST_DIR}/xml
     VERSION ${SINC_VERSION}
 )
