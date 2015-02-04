@@ -14,13 +14,15 @@ c_data_types = { \
         'string':'char*', \
         'unsigned':'unsigned', \
         'int':'int', \
+        'static':'static', \
+        'constant':'const', \
 }
 
 class CVisitor(AstVisitor):
     def folder(self):
         return 'c'
-    def full_filename(self):
-        return self.filename + '.h'
+    def extension(self):
+        return '.h'
     def write_intro(self):
         guard=""
         for n in self.ast.package.ns:
@@ -32,8 +34,8 @@ class CVisitor(AstVisitor):
         self.outfile.write('extern "C" {\n')
         self.outfile.write('#endif\n')
         self.nsprefix = ""
-    def write_package(self, package):
-        self.nsprefix = self.nsprefix + package + '_'
+    def write_namespace(self, ns):
+        self.nsprefix = self.nsprefix + ns + '_'
     def write_enumeration_name(self, name):
         self.enum_name = name
         self.outfile.write('typedef enum {\n')
@@ -42,18 +44,28 @@ class CVisitor(AstVisitor):
                 '_' + entry + ',\n')
     def write_enumeration_close(self, name):
         self.outfile.write('} ' + self.nsprefix + name + ';\n')
-    def write_constant(self, dataType, name, value):
-        self.outfile.write('static const ' + c_data_types[dataType] + ' ' \
-                + self.nsprefix + name + ' = ' + value + ';\n')
+    def write_assignment(self, assignment):
+        self.write_typedecl(assignment.typedecl)
+        self.outfile.write(assignment.name)
+        self.outfile.write(' = ')
+        self.outfile.write(assignment.value)
+        self.outfile.write(';\n')
+    def write_type(self, typename):
+        if typename.base in c_data_types:
+            self.outfile.write(c_data_types[typename.base] + ' ')
+        else:
+            self.outfile.write(self.nsprefix + typename.base + ' ')
+    def write_typedecl(self, typedecl):
+        for m in typedecl.modifiers:
+            self.outfile.write(c_data_types[m] + ' ')
+        self.write_type(typedecl.typename)
     def write_structure_name(self, name):
         self.outfile.write('typedef struct {\n')
-    def write_structure_element(self, dataType, name):
-        if dataType in c_data_types:
-            self.outfile.write('\t' + c_data_types[dataType] + \
-                    ' ' + name + ';\n')
-        else:
-            self.outfile.write('\t' + self.nsprefix + dataType + \
-                    ' ' + name + ';\n')
+    def write_declaration(self, declaration):
+        self.outfile.write('\t')
+        self.write_typedecl(declaration.typedecl)
+        self.outfile.write(declaration.name)
+        self.outfile.write(';\n')
     def write_structure_close(self, name):
         self.outfile.write('} ' + self.nsprefix + name + ';\n')
     def write_outro(self):

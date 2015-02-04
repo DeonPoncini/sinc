@@ -24,32 +24,53 @@ class Enumeration:
     def add_entry(self, entry):
         self.entries.append(entry)
 
-class Constant:
-    def __init__(self, name, dataType, value):
+class Type:
+    def __init__(self, base):
+        self.base = base
+        self.templates = []
+
+    def add_template(self, template):
+        self.templates.append(template)
+
+class Typedecl:
+    def __init__(self, typename):
+        self.typename = typename
+        self.modifiers = []
+
+    def add_modifier(self, modifier):
+        self.modifiers.append(modifier)
+
+class Assignment:
+    def __init__(self, name, typedecl, value):
         self.name = name
-        self.dataType = dataType
+        self.typedecl = typedecl
         self.value = value
+
+class Declaration:
+    def __init__(self, name, typedecl):
+        self.name = name
+        self.typedecl = typedecl
 
 class Structure:
     def __init__(self, name):
         self.name = name
-        self.elements = []
+        self.declarations = []
 
-    def add_element(self, element):
-        self.elements.append(element)
+    def add_declaration(self, declaration):
+        self.declarations.append(declaration)
 
 class Ast:
     def __init__(self, package):
         self.package = package
         self.enumerations = []
-        self.constants = []
+        self.assignments = []
         self.structures = []
 
     def add_enum(self, enumeration):
         self.enumerations.append(enumeration)
 
-    def add_constant(self, constant):
-        self.constants.append(constant)
+    def add_assignment(self, assignment):
+        self.assignments.append(assignment)
 
     def add_structure(self, structure):
         self.structures.append(structure)
@@ -61,39 +82,43 @@ class AstVisitor:
         self.filename = filename
     def folder(self):
         pass
-    def full_filename(self):
+    def extension(self):
         pass
     def open_file(self):
         fullpath = os.path.join(self.outpath, self.folder())
         if not os.path.exists(fullpath):
             os.makedirs(fullpath)
         self.outfile = codecs.open(os.path.join(fullpath, \
-                self.full_filename()), 'w', 'utf-8')
+                self.filename + self.extension()), 'w', 'utf-8')
     def write_intro(self):
         pass
-    def write_package(self, package):
+    def write_uri(self, uri):
+        pass
+    def write_namespace(self, ns):
         pass
     def write_enumeration_name(self, name):
         pass
-    def write_enumeration_entry(self, entry):
+    def write_enumeration_entry(self, enumeration):
         pass
     def write_enumeration_close(self, name):
         pass
-    def write_constant(self, dataType, name, value):
+    def write_typedecl(self, typedecl):
         pass
-    def write_structure_name(self, name):
+    def write_assignment(self, assignment):
         pass
-    def write_structure_element(self, dataType, name):
+    def write_modifier(self, modifier):
         pass
-    def write_structure_close(self, name):
+    def write_declaration(self, declaration):
         pass
     def write_outro(self):
         pass
     def write_ast(self):
         self.open_file()
         self.write_intro()
+
+        self.write_uri(self.ast.package.uri)
         for n in self.ast.package.ns:
-            self.write_package(n)
+            self.write_namespace(n)
 
         for e in self.ast.enumerations:
             self.write_enumeration_name(e.name)
@@ -101,13 +126,13 @@ class AstVisitor:
                 self.write_enumeration_entry(entry)
             self.write_enumeration_close(e.name)
 
-        for c in self.ast.constants:
-            self.write_constant(c.dataType, c.name, c.value)
+        for a in self.ast.assignments:
+            self.write_assignment(a)
 
         for s in self.ast.structures:
             self.write_structure_name(s.name)
-            for e in s.elements:
-                self.write_structure_element(e.dataType, e.name)
+            for d in s.declarations:
+                self.write_declaration(d)
             self.write_structure_close(s.name)
 
         self.write_outro()
