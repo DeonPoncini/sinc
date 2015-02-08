@@ -81,9 +81,9 @@ class AstVisitor:
         self.outpath = outpath
         self.filename = filename
     def folder(self):
-        pass
+        return ''
     def extension(self):
-        pass
+        return ''
     def open_file(self):
         fullpath = os.path.join(self.outpath, self.folder())
         if not os.path.exists(fullpath):
@@ -91,49 +91,50 @@ class AstVisitor:
         self.outfile = codecs.open(os.path.join(fullpath, \
                 self.filename + self.extension()), 'w', 'utf-8')
     def write_intro(self):
-        pass
+        return ''
     def write_uri(self, uri):
-        pass
+        return ''
     def write_namespace(self, ns):
-        pass
+        return ''
     def write_enumeration_name(self, name):
-        pass
+        return ''
     def write_enumeration_entry(self, enumeration):
-        pass
+        return ''
     def write_enumeration_close(self, name):
-        pass
+        return ''
     def write_typedecl(self, typedecl):
-        pass
+        return ''
     def write_assignment(self, assignment):
-        pass
+        return ''
     def write_modifier(self, modifier):
-        pass
+        return ''
     def write_declaration(self, declaration):
-        pass
+        return ''
     def write_outro(self):
-        pass
+        return ''
     def write_ast(self):
         self.open_file()
-        self.write_intro()
+        outstr = self.write_intro()
 
-        self.write_uri(self.ast.package.uri)
+        outstr += self.write_uri(self.ast.package.uri)
         for n in self.ast.package.ns:
-            self.write_namespace(n)
+            outstr += self.write_namespace(n)
 
         for e in self.ast.enumerations:
-            self.write_enumeration_name(e.name)
+            outstr += self.write_enumeration_name(e.name)
             for entry in e.entries:
-                self.write_enumeration_entry(entry)
-            self.write_enumeration_close(e.name)
+                outstr += self.write_enumeration_entry(entry)
+            outstr += self.write_enumeration_close(e.name)
 
         for a in self.ast.assignments:
-            self.write_assignment(a)
+            outstr += self.write_assignment(a)
 
         for s in self.ast.structures:
-            self.write_structure_name(s.name)
+            outstr += self.write_structure_name(s.name)
             for d in s.declarations:
-                self.write_declaration(d)
-            self.write_structure_close(s.name)
+                outstr += self.write_declaration(d)
+            outstr += self.write_structure_close(s.name)
 
-        self.write_outro()
+        outstr += self.write_outro()
+        self.outfile.write(outstr)
 

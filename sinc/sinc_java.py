@@ -30,44 +30,42 @@ class JavaVisitor(AstVisitor):
         for p in self.paths:
             packageName = packageName + p + '.'
         packageName = packageName[:-1]
-        self.outfile.write('package ' + packageName + ';\n')
-        self.outfile.write('public class ' + self.filename + ' {\n')
+        return 'package ' + packageName + ';\n' +\
+            'public class ' + self.filename + ' {\n'
     def write_enumeration_name(self, name):
-        self.outfile.write('public enum ' + name + ' {\n')
+        return 'public enum ' + name + ' {\n'
     def write_enumeration_entry(self, entry):
-        self.outfile.write('\t' + entry + ',\n')
+        return '\t' + entry + ',\n'
     def write_enumeration_close(self, name):
-        self.outfile.write('}\n')
+        return '}\n'
     def write_assignment(self, assignment):
-        self.outfile.write('public ')
-        self.write_typedecl(assignment.typedecl)
-        self.outfile.write(assignment.name)
-        self.outfile.write(' = ')
-        self.outfile.write(assignment.value)
-        self.outfile.write(';\n')
+        return 'public ' + self.write_typedecl(assignment.typedecl) +\
+            assignment.name + ' = ' + assignment.value + ';\n'
     def write_type(self, typename):
+        ret = ''
         if typename.base in java_data_types:
-            self.outfile.write(java_data_types[typename.base] + ' ')
+            ret = ret + java_data_types[typename.base] + ' '
         else:
-            self.outfile.write(typename.base + ' ')
+            ret = ret + typename.base + ' '
         if typename.templates:
-            self.outfile.write('<')
+            ret = ret + '<'
             for t in typename.templates:
-                self.write_typedecl(self, t)
-                self.outfile.write(',')
-            self.outfile.write('> ')
+                ret = ret + self.write_typedecl(t)
+                ret = ret + ','
+            ret = ret[:-1]
+            ret = ret + '> '
+        return ret
     def write_typedecl(self, typedecl):
+        ret = ''
         for m in typedecl.modifiers:
-            self.outfile.write(java_data_types[m] + ' ')
-        self.write_type(typedecl.typename)
+            ret = ret + java_data_types[m] + ' '
+        return ret + self.write_type(typedecl.typename)
     def write_structure_name(self, name):
-        self.outfile.write('public static class ' + name + '{\n')
+        return 'public static class ' + name + '{\n'
     def write_declaration(self, declaration):
-        self.outfile.write('\tpublic ')
-        self.write_typedecl(declaration.typedecl)
-        self.outfile.write(declaration.name)
-        self.outfile.write(';\n')
+        return '\tpublic ' + self.write_typedecl(declaration.typedecl) +\
+            declaration.name + ';\n'
     def write_structure_close(self, name):
-        self.outfile.write('}\n')
+        return '}\n'
     def write_outro(self):
-        self.outfile.write('}\n')
+        return '}\n'

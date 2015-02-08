@@ -24,52 +24,49 @@ class CVisitor(AstVisitor):
     def extension(self):
         return '.h'
     def write_intro(self):
-        guard=""
+        self.guard=""
         for n in self.ast.package.ns:
-            guard = guard + n.upper() + '_'
-        guard += self.filename.upper() + '_H_C'
-        self.outfile.write('#ifndef ' + guard + '\n')
-        self.outfile.write('#define ' + guard + '\n')
-        self.outfile.write('#ifdef __cplusplus\n')
-        self.outfile.write('extern "C" {\n')
-        self.outfile.write('#endif\n')
+            self.guard = self.guard + n.upper() + '_'
+        self.guard += self.filename.upper() + '_H_C'
         self.nsprefix = ""
+        return '#ifndef ' + self.guard + '\n' +\
+            '#define ' + self.guard + '\n' +\
+            '#ifdef __cplusplus\n' +\
+            'extern "C" {\n' +\
+            '#endif\n'
     def write_namespace(self, ns):
         self.nsprefix = self.nsprefix + ns + '_'
+        return ''
     def write_enumeration_name(self, name):
         self.enum_name = name
-        self.outfile.write('typedef enum {\n')
+        return 'typedef enum {\n'
     def write_enumeration_entry(self, entry):
-        self.outfile.write('\t' + self.nsprefix + self.enum_name + \
-                '_' + entry + ',\n')
+        return '\t' + self.nsprefix + self.enum_name +\
+                '_' + entry + ',\n'
     def write_enumeration_close(self, name):
-        self.outfile.write('} ' + self.nsprefix + name + ';\n')
+        return '} ' + self.nsprefix + name + ';\n'
     def write_assignment(self, assignment):
-        self.write_typedecl(assignment.typedecl)
-        self.outfile.write(assignment.name)
-        self.outfile.write(' = ')
-        self.outfile.write(assignment.value)
-        self.outfile.write(';\n')
+        return self.write_typedecl(assignment.typedecl) +\
+            assignment.name + ' = ' + assignment.value + ';\n'
     def write_type(self, typename):
         if typename.base in c_data_types:
-            self.outfile.write(c_data_types[typename.base] + ' ')
+            return c_data_types[typename.base] + ' '
         else:
-            self.outfile.write(self.nsprefix + typename.base + ' ')
+            return self.nsprefix + typename.base + ' '
     def write_typedecl(self, typedecl):
+        self.ret = ''
         for m in typedecl.modifiers:
-            self.outfile.write(c_data_types[m] + ' ')
-        self.write_type(typedecl.typename)
+            self.ret = self.ret + c_data_types[m] + ' '
+        return self.ret + self.write_type(typedecl.typename)
     def write_structure_name(self, name):
-        self.outfile.write('typedef struct {\n')
+        return 'typedef struct {\n'
     def write_declaration(self, declaration):
-        self.outfile.write('\t')
-        self.write_typedecl(declaration.typedecl)
-        self.outfile.write(declaration.name)
-        self.outfile.write(';\n')
+        return '\t' +\
+            self.write_typedecl(declaration.typedecl) + declaration.name + ';\n'
     def write_structure_close(self, name):
-        self.outfile.write('} ' + self.nsprefix + name + ';\n')
+        return '} ' + self.nsprefix + name + ';\n'
     def write_outro(self):
-        self.outfile.write('#ifdef __cplusplus\n')
-        self.outfile.write('}\n')
-        self.outfile.write('#endif\n')
-        self.outfile.write('#endif\n')
+        return '#ifdef __cplusplus\n' +\
+            '}\n' +\
+            '#endif\n' +\
+            '#endif\n'
