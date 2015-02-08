@@ -41,7 +41,7 @@ def read_type(t):
     if templates:
         template = templates[0].findall('typedecl')
         for t1 in template:
-            typename.append(read_typedecl(t1))
+            typename.add_template(read_typedecl(t1))
     return typename
 
 def read_typedecl(t):
