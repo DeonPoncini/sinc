@@ -39,9 +39,9 @@ def read_type(t):
     templates = t.findall('templates')
     typename = Type(base)
     if templates:
-        template = templates[0].findall('template')
+        template = templates[0].findall('typedecl')
         for t1 in template:
-            typename.append(t1.text)
+            typename.append(read_typedecl(t1))
     return typename
 
 def read_typedecl(t):

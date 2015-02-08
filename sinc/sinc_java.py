@@ -53,7 +53,8 @@ class JavaVisitor(AstVisitor):
         if typename.templates:
             self.outfile.write('<')
             for t in typename.templates:
-                self.outfile.write(t + ',')
+                self.write_typedecl(self, t)
+                self.outfile.write(',')
             self.outfile.write('> ')
     def write_typedecl(self, typedecl):
         for m in typedecl.modifiers:

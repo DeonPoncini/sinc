@@ -10,7 +10,6 @@
 <xs:element name="modifier" type="xs:string" />
 <xs:element name="value" type="xs:string" />
 <xs:element name="base" type="xs:string" />
-<xs:element name="template" type="xs:string" />
 
 <xs:element name="namespaces">
     <xs:complexType>
@@ -57,7 +56,7 @@
 <xs:element name="templates">
     <xs:complexType>
         <xs:sequence>
-            <xs:element ref="template" minOccurs="1" maxOccurs="unbounded" />
+            <xs:element ref="typedecl" minOccurs="1" maxOccurs="unbounded" />
         </xs:sequence>
     </xs:complexType>
 </xs:element>
