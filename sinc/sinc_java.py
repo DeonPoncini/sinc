@@ -14,6 +14,11 @@ java_data_types = { \
         'int':'int', \
         'static':'static', \
         'constant':'final', \
+        'vector':'ArrayList', \
+}
+
+java_includes = { \
+        'vector':'import java.util.ArrayList\n', \
 }
 
 class JavaVisitor(AstVisitor):
@@ -30,7 +35,9 @@ class JavaVisitor(AstVisitor):
         for p in self.paths:
             packageName = packageName + p + '.'
         packageName = packageName[:-1]
+        includes = self.write_includes(java_includes)
         return 'package ' + packageName + ';\n' +\
+                includes +\
             'public class ' + self.filename + ' {\n'
     def write_enumeration_name(self, name):
         return 'public enum ' + name + ' {\n'

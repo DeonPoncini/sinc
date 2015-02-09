@@ -16,6 +16,12 @@ cpp_data_types = { \
         'int':'int', \
         'static':'static', \
         'constant':'const', \
+        'vector':'std::vector', \
+}
+
+cpp_includes = { \
+        'string':'#include <string>\n', \
+        'vector':'#include <vector>\n', \
 }
 
 class CppVisitor(AstVisitor):
@@ -28,9 +34,9 @@ class CppVisitor(AstVisitor):
         for n in self.ast.package.ns:
             guard = guard + n.upper() + '_'
         guard += self.filename.upper() + '_H_CPP'
+        includes = self.write_includes(cpp_includes)
         return '#ifndef ' + guard + '\n' +\
-            '#define ' + guard + '\n' +\
-            '#include <string>\n'
+            '#define ' + guard + '\n' + includes
     def write_namespace(self, ns):
         return 'namespace ' + ns + ' {\n'
     def write_enumeration_name(self, name):

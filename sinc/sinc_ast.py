@@ -90,6 +90,21 @@ class AstVisitor:
             os.makedirs(fullpath)
         self.outfile = codecs.open(os.path.join(fullpath, \
                 self.filename + self.extension()), 'w', 'utf-8')
+    def include_type(self, includemap, includes, typedecl):
+        if typedecl.typename.base in includemap:
+            if not includemap[typedecl.typename.base] in includes:
+                includes = includes + includemap[typedecl.typename.base]
+        for t in typedecl.typename.templates:
+            includes = includes + include_type(includes, t)
+        return includes
+    def write_includes(self, includemap):
+        includes = ''
+        for a in self.ast.assignments:
+            includes = self.include_type(includemap, includes, a.typedecl)
+        for s in self.ast.structures:
+            for d in s.declarations:
+                includes = self.include_type(includemap, includes, d.typedecl)
+        return includes
     def write_intro(self):
         return ''
     def write_uri(self, uri):
